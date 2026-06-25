@@ -1,0 +1,14 @@
+# EKO-AI Prototype — Python dependencies
+#
+# Install with:  pip install -r requirements.txt
+#
+# Every dependency here is free and open-source. Nothing in this list
+# requires an API key or makes an external network call at runtime.
+
+fastapi==0.115.0          # the web framework that serves our /ask, /search, /documents endpoints
+uvicorn==0.30.6            # the server that actually runs FastAPI
+pypdf==4.3.1                # reads text out of real PDF files
+python-docx==1.1.2          # reads text out of real Word (.docx) files
+numpy==1.26.4               # fast math for our TF-IDF vectors and cosine similarity
+python-multipart==0.0.9     # required by FastAPI to handle file uploads
+pillow==10.4.0               # used for basic image inspection (size, format) during ingestion

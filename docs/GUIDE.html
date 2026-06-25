@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EKO-AI Prototype — Complete Technical Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#0F1B2D;--panel:#16243A;--panel-2:#1B2C45;--line:#2A3B56;--text:#E8EBF1;--dim:#9AA8C2;--faint:#6E7C99;--gold:#C9A24B;--gold-2:#8A7038;--green:#3FA66B;--green-dim:#1F4030;--red:#C2483B;--mono:'IBM Plex Mono',monospace;--sans:'Inter',sans-serif;}
+*{box-sizing:border-box;margin:0;padding:0;}html{scroll-behavior:smooth;}
+body{background:var(--navy);color:var(--text);font-family:var(--sans);line-height:1.65;font-size:16px;-webkit-font-smoothing:antialiased;}
+::selection{background:var(--gold);color:var(--navy);}
+a{color:var(--gold);}
+.wrap{max-width:900px;margin:0 auto;padding:0 28px;}
+.topbar{position:sticky;top:0;z-index:50;background:rgba(15,27,45,0.95);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);}
+.topbar-inner{max-width:900px;margin:0 auto;padding:13px 28px;display:flex;align-items:center;justify-content:space-between;font-family:var(--mono);font-size:12px;color:var(--faint);}
+.hero{padding:80px 0 56px;}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:0.12em;color:var(--gold);text-transform:uppercase;margin-bottom:18px;}
+h1.title{font-weight:800;font-size:clamp(28px,5vw,46px);line-height:1.08;letter-spacing:-0.02em;color:#fff;max-width:740px;}
+h1.title em{font-style:normal;color:var(--gold);}
+.sub{margin-top:18px;font-size:17px;color:var(--dim);max-width:600px;}
+.toc{display:flex;flex-wrap:wrap;gap:8px;margin-top:28px;}
+.toc a{font-family:var(--mono);font-size:12px;color:var(--dim);border:1px solid var(--line);border-radius:20px;padding:6px 14px;text-decoration:none;}
+.toc a:hover{border-color:var(--gold);color:var(--gold);}
+section{padding:52px 0;border-top:1px solid var(--line);}
+.sec-label{font-family:var(--mono);font-size:12px;color:var(--gold);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:12px;}
+h2{font-weight:700;font-size:clamp(20px,3vw,28px);color:#fff;letter-spacing:-0.01em;margin-bottom:14px;}
+h3{font-weight:600;font-size:18px;color:#fff;margin:28px 0 10px;}
+h4{font-weight:600;font-size:15px;color:var(--dim);margin:18px 0 7px;text-transform:uppercase;letter-spacing:0.06em;font-family:var(--mono);}
+p{color:var(--dim);font-size:15px;margin-bottom:12px;max-width:740px;}
+p strong{color:var(--text);font-weight:600;}
+ol.steps{list-style:none;counter-reset:step;margin:18px 0;}
+ol.steps li{counter-increment:step;position:relative;padding:14px 0 14px 52px;border-top:1px solid var(--line);color:var(--dim);font-size:15px;}
+ol.steps li:first-child{border-top:none;}
+ol.steps li::before{content:counter(step);position:absolute;left:0;top:14px;font-family:var(--mono);font-weight:600;font-size:13px;color:var(--gold);width:34px;height:34px;border:1px solid var(--gold-2);border-radius:6px;display:flex;align-items:center;justify-content:center;}
+ol.steps li strong{color:var(--text);font-weight:600;}
+ul.plain{list-style:none;margin:16px 0;}
+ul.plain li{padding:9px 0 9px 22px;position:relative;color:var(--dim);border-top:1px solid var(--line);font-size:15px;}
+ul.plain li:first-child{border-top:none;}
+ul.plain li::before{content:"—";position:absolute;left:0;color:var(--faint);}
+pre,.code{background:#0A1320;border:1px solid var(--line);border-radius:8px;padding:16px 20px;overflow-x:auto;margin:14px 0;font-family:var(--mono);font-size:13px;line-height:1.6;color:#C9D6E8;}
+pre .c,.code .c{color:var(--faint);}
+pre .cmd,.code .cmd{color:var(--gold);}
+pre .str,.code .str{color:var(--green);}
+pre .k{color:#5B8DEF;}
+table{width:100%;border-collapse:collapse;margin:18px 0;font-size:14px;}
+th{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:0.06em;text-align:left;color:var(--faint);padding:9px 12px;border-bottom:1px solid var(--line);}
+td{padding:12px;border-bottom:1px solid var(--line);color:var(--dim);vertical-align:top;}
+td:first-child,th:first-child{color:var(--text);font-weight:500;}
+tr:last-child td{border-bottom:none;}
+.callout{border-left:3px solid var(--gold);background:var(--panel);border-radius:0 8px 8px 0;padding:14px 18px;margin:18px 0;}
+.callout .lab{font-family:var(--mono);font-size:11px;color:var(--gold);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:5px;}
+.callout p{margin-bottom:0;color:var(--text);max-width:none;}
+.callout.green{border-left-color:var(--green);}.callout.green .lab{color:var(--green);}
+.callout.red{border-left-color:var(--red);}.callout.red .lab{color:var(--red);}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:18px 0;}
+@media(max-width:640px){.grid2{grid-template-columns:1fr;}}
+.card{border:1px solid var(--line);border-radius:8px;padding:18px;background:var(--panel);}
+.card .ck{font-family:var(--mono);font-size:11px;color:var(--gold);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:7px;}
+.card h4{font-size:14.5px;color:#fff;margin:0 0 5px;font-weight:600;text-transform:none;letter-spacing:0;}
+.card p{font-size:13.5px;color:var(--dim);margin:0;max-width:none;}
+.file-tree{font-family:var(--mono);font-size:13px;color:#C9D6E8;background:#0A1320;border:1px solid var(--line);border-radius:8px;padding:18px 20px;line-height:1.8;margin:14px 0;}
+.file-tree .comment{color:var(--faint);}
+.badge{display:inline-block;font-family:var(--mono);font-size:11px;padding:2px 8px;border-radius:12px;border:1px solid var(--line);color:var(--dim);margin-right:5px;}
+.badge.free{border-color:var(--green-dim);color:var(--green);}
+footer{padding:48px 0 80px;border-top:1px solid var(--line);}
+footer p{font-size:12px;color:var(--faint);font-family:var(--mono);}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-inner">
+    <span>EKO-AI / PROTOTYPE TECHNICAL GUIDE</span>
+    <span>INTERNAL · NOT CONFIDENTIAL DATA</span>
+  </div>
+</div>
+<div class="wrap">
+
+<div class="hero">
+  <div class="eyebrow">Prototype Technical Guide</div>
+  <h1 class="title">EKO-AI — <em>everything</em> you need to run, test, and understand it.</h1>
+  <p class="sub">What it is, how it works, every file, every step to run it locally, how to test it, how to add new documents, and what each part of the code does.</p>
+  <div class="toc">
+    <a href="#what">What it is</a>
+    <a href="#files">File structure</a>
+    <a href="#how">How it works</a>
+    <a href="#run">How to run</a>
+    <a href="#test">How to test</a>
+    <a href="#newdocs">Adding documents</a>
+    <a href="#upgrade">Upgrade path</a>
+    <a href="#security">Security proof</a>
+  </div>
+</div>
+
+<section id="what">
+  <div class="sec-label">01 / What It Is</div>
+  <h2>The prototype in one paragraph</h2>
+  <p>EKO-AI is a local, offline, zero-API-call knowledge assistant that answers questions from a set of company policy documents. You run a Python server on your laptop, open an HTML file in your browser, and ask questions. The system searches 24 approved policy documents covering all five company towers (AuthEnq, EIS, ITS, Digital, Operations) and returns a direct, sourced answer — citing the exact document ID and section — in under 2 milliseconds per query. Every question is logged. Questions the system can't find an approved source for are refused explicitly, not guessed at.</p>
+
+  <div class="callout green">
+    <div class="lab">The one claim that matters for the pitch</div>
+    <p>After running <code>pip install</code>, disconnect your laptop from WiFi. The entire system — search, answers, audit log — still works perfectly. There is no external network call anywhere in the answer path. This is verifiable by anyone who reads the code, which is exactly the argument for a security-conscious organization.</p>
+  </div>
+
+  <h3>What this prototype proves vs what it doesn't prove yet</h3>
+  <div class="grid2">
+    <div class="card">
+      <div class="ck">Proven</div>
+      <h4>Core architecture works</h4>
+      <p>Retrieval, chunking, citation, audit log, refusal path, and the zero-API-call security design all work end-to-end at prototype scale.</p>
+    </div>
+    <div class="card">
+      <div class="ck">Proven</div>
+      <h4>Sub-2ms query latency</h4>
+      <p>TF-IDF in-memory retrieval is measurably fast even on a laptop CPU with no GPU or special hardware.</p>
+    </div>
+    <div class="card">
+      <div class="ck">Not yet proven</div>
+      <h4>Scale beyond ~500 documents</h4>
+      <p>The in-memory index works beautifully at 134 chunks / 27 documents. At 10,000+ chunks, you'd want a proper vector database (Qdrant, pgvector) — see the upgrade path section.</p>
+    </div>
+    <div class="card">
+      <div class="ck">Not yet proven</div>
+      <h4>Richer language understanding</h4>
+      <p>TF-IDF matches vocabulary, not meaning. "Photo restriction" and "camera rule" are the same concept but different words — a neural embedding model handles this better. The upgrade path shows exactly where to add one.</p>
+    </div>
+  </div>
+</section>
+
+<section id="files">
+  <div class="sec-label">02 / File Structure</div>
+  <h2>Every file and what it does</h2>
+  <div class="file-tree">eko-prototype/
+├── backend/                  <span class="comment">Python server — all the AI and search logic</span>
+│   ├── extract.py            <span class="comment">Stage 1: reads PDFs, Word files, Markdown, images → raw text</span>
+│   ├── chunk.py              <span class="comment">Stage 2: splits raw text into overlapping searchable chunks</span>
+│   ├── retrieval.py          <span class="comment">Stage 3: TF-IDF index build + cosine similarity search</span>
+│   ├── synthesize.py         <span class="comment">Stage 4: picks best sentences from chunks → builds answer</span>
+│   ├── ingest.py             <span class="comment">Orchestrates Stages 1-3 over the whole sample-docs/ folder</span>
+│   ├── audit.py              <span class="comment">Appends one JSON record per question to audit_log.jsonl</span>
+│   ├── main.py               <span class="comment">FastAPI app: /ask, /health, /documents, /audit, /reindex</span>
+│   ├── requirements.txt      <span class="comment">All Python dependencies — free, no API keys</span>
+│   └── data/
+│       └── audit_log.jsonl   <span class="comment">Auto-created on first question; one JSON object per line</span>
+│
+├── frontend/
+│   └── index.html            <span class="comment">Complete chat UI — no build step, just open in browser</span>
+│
+├── sample-docs/              <span class="comment">24 simulated company documents (6 PDFs + 18 Markdown)</span>
+│   ├── POL-COC-001*.pdf      <span class="comment">Code of Conduct (confidentiality, AI usage, photography rules)</span>
+│   ├── POL-PAY-014*.pdf      <span class="comment">Payroll and salary structure</span>
+│   ├── POL-SEC-003*.pdf      <span class="comment">IT Security and Acceptable Use</span>
+│   ├── FAQ-GEN-001*.pdf      <span class="comment">General FAQs — all towers</span>
+│   ├── ONB-NJ-002*.pdf       <span class="comment">New Joiner Day 1 / Week 1 checklist</span>
+│   ├── TRN-MAND-009*.pdf     <span class="comment">Mandatory trainings list with suggested order</span>
+│   └── [18 more .md files]   <span class="comment">Leave, exit, BGV, asset, ethics, tower overviews, etc.</span>
+│
+├── sample-images/            <span class="comment">3 simulated company diagrams (PNG)</span>
+│   ├── escalation-matrix-diagram.png
+│   ├── new-joiner-journey-flow.png
+│   └── tower-org-structure.png
+│
+├── docs/
+│   └── GUIDE.html            <span class="comment">This file — the complete technical guide</span>
+│
+├── make_pdfs.py              <span class="comment">Utility: converts Markdown docs to real PDFs for testing</span>
+└── make_images.py            <span class="comment">Utility: generates the sample diagram images</span></div>
+</section>
+
+<section id="how">
+  <div class="sec-label">03 / How It Works</div>
+  <h2>The full pipeline, step by step</h2>
+  <p>There are four stages that run once at startup, and then a fifth stage that runs every time someone asks a question.</p>
+
+  <h3>Startup pipeline (runs once, ~300–500ms)</h3>
+  <ol class="steps">
+    <li><strong>Extract</strong> — <code>extract.py</code> reads every file in <code>sample-docs/</code> and <code>sample-images/</code>, routing each file to the right reader based on its extension: <code>pypdf</code> for PDFs, <code>python-docx</code> for Word files, plain text reader for Markdown, and PIL image metadata for images. Output: one raw text string per document.</li>
+    <li><strong>Chunk</strong> — <code>chunk.py</code> splits each document into overlapping sections of ~220 words. It first tries to split on section headings ("## Heading" in Markdown, or "1. Section Title" in PDF-extracted text). For any section longer than 220 words, it applies a sliding-window sub-split with 40-word overlap. Each chunk is tagged with its document ID, title, section name, status ("approved"), and metadata. Output: 134 Chunk objects across all 27 documents.</li>
+    <li><strong>Build TF-IDF index</strong> — <code>retrieval.py</code> tokenizes every chunk's text, builds a vocabulary of 1,866 unique words across the corpus, computes IDF weights (rarer words get higher weight), and produces a normalized TF-IDF vector for each chunk. Vectors are stored as a NumPy matrix in memory. Output: an in-memory searchable index.</li>
+  </ol>
+
+  <h3>Per-question pipeline (runs in ~1ms)</h3>
+  <ol class="steps">
+    <li><strong>Vectorize the question</strong> — The user's question is tokenized using the same vocabulary built at startup, and converted into a TF-IDF vector using the same IDF weights. Words in the question that weren't in any document are simply ignored.</li>
+    <li><strong>Cosine similarity search</strong> — A single matrix-vector multiply scores the question against every chunk simultaneously. Chunks with status "approved" are the only ones eligible to score — draft or retired documents are excluded at the query level, not in a post-filter step. The top 5 chunks are returned.</li>
+    <li><strong>Answer synthesis</strong> — <code>synthesize.py</code> re-joins PDF-wrapped lines into whole sentences, strips numbered list markers, and ranks each sentence by how many query words it contains. The best 1–2 sentences from the top 1–3 chunks are combined into the final answer. Sources (doc_id, section, relevance score) are attached.</li>
+    <li><strong>Audit log</strong> — Before returning the response, <code>audit.py</code> appends one line to <code>backend/data/audit_log.jsonl</code> recording the timestamp, query, whether an answer was found, confidence level, which document IDs were used, and query latency in milliseconds.</li>
+  </ol>
+
+  <h3>TF-IDF in plain language</h3>
+  <p><strong>TF</strong> (Term Frequency) = how often a word appears in this chunk. <strong>IDF</strong> (Inverse Document Frequency) = how rare that word is across all chunks. A word like "gratuity" that appears in one chunk and nowhere else is a strong signal; a word like "policy" that's in every document tells you almost nothing. TF-IDF multiplies both together, so rare-but-locally-frequent words score highest — exactly the behaviour you'd want for finding a specific policy section.</p>
+  <p>Cosine similarity then measures how much a query's word-pattern overlaps with each chunk's word-pattern. It's fast (a matrix multiply in NumPy), requires no GPU, runs on any laptop CPU, and has no internet surface area at all.</p>
+</section>
+
+<section id="run">
+  <div class="sec-label">04 / Running It</div>
+  <h2>How to run this locally — complete steps</h2>
+
+  <h3>Requirements</h3>
+  <table>
+    <tr><th>Requirement</th><th>Details</th></tr>
+    <tr><td>Python 3.10 or newer</td><td>Download from python.org — free</td></tr>
+    <tr><td>8 GB RAM minimum</td><td>16 GB comfortable; 8 GB works for this prototype</td></tr>
+    <tr><td>Any modern browser</td><td>Chrome, Firefox, Edge, Safari — no extensions needed</td></tr>
+    <tr><td>No GPU needed</td><td>TF-IDF runs on CPU only; this prototype is designed for that</td></tr>
+    <tr><td>No API key needed</td><td>Intentionally; zero external dependencies at runtime</td></tr>
+  </table>
+
+  <ol class="steps">
+    <li><strong>Open a terminal inside the backend folder.</strong>
+      <pre><span class="cmd">cd</span> eko-prototype/backend</pre>
+    </li>
+    <li><strong>Install all Python dependencies.</strong> This only needs to happen once. <span class="badge free">All free</span> <span class="badge free">No API keys</span>
+      <pre>pip install -r requirements.txt</pre>
+    </li>
+    <li><strong>Start the server.</strong> On startup, the server automatically reads every document in <code>sample-docs/</code> and <code>sample-images/</code>, builds the index, and starts listening on port 8000.
+      <pre>uvicorn main:app <span class="k">--reload</span> <span class="k">--port</span> 8000</pre>
+      Watch for this line in the terminal output — it means the index is built and the server is ready:
+      <pre><span class="str">Index ready. Server is now accepting requests.</span></pre>
+    </li>
+    <li><strong>Open the frontend.</strong> No build step — just open the file directly in your browser.
+      <pre><span class="comment"># On Mac:</span>
+open eko-prototype/frontend/index.html
+
+<span class="comment"># On Windows (run in cmd or PowerShell):</span>
+start eko-prototype/frontend/index.html
+
+<span class="comment"># Or just drag the file into any browser window.</span></pre>
+    </li>
+    <li><strong>Ask your first question.</strong> Type in the chat input and press Enter. The "SYSTEM READY" status in the sidebar confirms the backend is connected. Answers typically appear in under 100ms from your keypress (dominated by browser rendering and network round-trip to localhost, not by search latency).</li>
+  </ol>
+
+  <div class="callout">
+    <div class="lab">The --reload flag</div>
+    <p><code>--reload</code> makes the server automatically restart whenever you edit a Python file — useful while developing. Remove it in any kind of stable/demo setup where you don't want accidental restarts.</p>
+  </div>
+</section>
+
+<section id="test">
+  <div class="sec-label">05 / Testing</div>
+  <h2>How to test that everything is working correctly</h2>
+
+  <h3>Quick sanity check — from the terminal</h3>
+  <pre><span class="comment"># Run this from the backend/ folder to test the full pipeline without starting the web server.</span>
+<span class="comment"># It ingests all documents, builds the index, and runs a test search query, printing results.</span>
+python3 ingest.py</pre>
+  <p>You should see every document listed with its chunk count, followed by a test search result showing the top-matching chunk for "can I take a photo of client code".</p>
+
+  <h3>Interactive API explorer</h3>
+  <p>FastAPI automatically generates interactive documentation at <a href="http://localhost:8000/docs" target="_blank">http://localhost:8000/docs</a> — open this in a browser while the server is running and you can try every endpoint without writing any code.</p>
+
+  <h3>Key test cases to verify</h3>
+  <table>
+    <tr><th>Test</th><th>Expected result</th></tr>
+    <tr><td>"Can I take a photo of my screen?"</td><td>Cites POL-SEC-003 / Section 2. Photography and Recording Restrictions</td></tr>
+    <tr><td>"When is salary credited?"</td><td>Cites POL-PAY-014 / Section 1. Salary Disbursement. Confidence: high.</td></tr>
+    <tr><td>"Can I use ChatGPT for client work?"</td><td>Cites POL-COC-001 / Section 4. Use of AI Tools at Work</td></tr>
+    <tr><td>"What trainings do I need in Week 1?"</td><td>Cites TRN-MAND-009 plus the onboarding checklist</td></tr>
+    <tr><td>A completely random topic ("what is the capital of France")</td><td>Refusal: "I could not find an approved source…" — found=false</td></tr>
+  </table>
+
+  <h3>Verify the audit log</h3>
+  <p>After asking a few questions, check this URL in your browser: <a href="http://localhost:8000/audit" target="_blank">http://localhost:8000/audit</a>. Every question you asked should appear there with its timestamp and confidence rating. This is what proves "every question is logged" to a demo audience.</p>
+
+  <h3>Verify the document index</h3>
+  <p>Check <a href="http://localhost:8000/documents" target="_blank">http://localhost:8000/documents</a> to see every indexed document, its source file type, and how many chunks it was split into. Expected: 27 documents, 134 chunks total.</p>
+</section>
+
+<section id="newdocs">
+  <div class="sec-label">06 / Adding Documents</div>
+  <h2>How to add new documents and keep them searchable</h2>
+
+  <ol class="steps">
+    <li><strong>Drop the file into <code>sample-docs/</code>.</strong> Supported formats: <code>.pdf</code>, <code>.docx</code>, <code>.md</code>, <code>.txt</code>. For the document to be found accurately, structure it with numbered section headings like the existing docs — e.g. "## 1. Section Name" in Markdown, or "1. Section Name" as a line in a Word/PDF document.</li>
+    <li><strong>Add document metadata near the top of the file</strong> (optional but recommended). The ingestion pipeline looks for these lines in the first 10 lines of the file and uses them for document-level metadata and citation display:
+      <pre>Document ID: POL-XYZ-001
+Owner: Team or Department Name
+Status: Approved
+Version: 1.0
+Last Updated: 2026-06-22</pre>
+    </li>
+    <li><strong>Trigger re-indexing</strong> — two options:
+      <pre><span class="comment"># Option A: call the reindex endpoint (no server restart needed)</span>
+curl -X POST http://localhost:8000/reindex
+
+<span class="comment"># Option B: restart the server (it re-reads everything on startup)</span>
+<span class="comment"># Press Ctrl+C in the terminal where uvicorn is running, then run uvicorn again.</span></pre>
+    </li>
+    <li><strong>Verify the new document appears</strong> in the document index at <a href="http://localhost:8000/documents" target="_blank">http://localhost:8000/documents</a> and test a question about its content.</li>
+  </ol>
+
+  <div class="callout red">
+    <div class="lab">Important: never add real client data to this prototype</div>
+    <p>This prototype runs on your personal laptop and uses a simple local file for the audit log. Use only sample, invented, or public documents until this system is running on company-approved infrastructure with proper access controls.</p>
+  </div>
+</section>
+
+<section id="upgrade">
+  <div class="sec-label">07 / Upgrade Path</div>
+  <h2>How this grows from prototype to production</h2>
+  <p>Every upgrade below requires changing exactly one or two files — the rest of the pipeline stays identical. This is intentional: the stages were designed to be independently replaceable.</p>
+
+  <table>
+    <tr><th>Upgrade</th><th>Change where</th><th>What changes</th></tr>
+    <tr><td>Better language understanding (neural embeddings)</td><td><code>retrieval.py</code> — change the two marked functions in the "Upgrade Path" comment block</td><td>Replace TF-IDF vectorization with a locally-hosted model like <code>all-MiniLM-L6-v2</code> via sentence-transformers. Requires a ~90MB model download. Everything else identical.</td></tr>
+    <tr><td>Persistent storage at scale (vector database)</td><td><code>retrieval.py</code> — swap <code>TfidfIndex</code> for a Qdrant or pgvector client</td><td>At thousands of documents, in-memory storage becomes too large. A vector DB handles persistence and larger-scale retrieval. No change to extract, chunk, synthesize, or main.</td></tr>
+    <tr><td>Add a local LLM for richer answers</td><td><code>synthesize.py</code> — add an Ollama API call after chunk selection</td><td>After retrieving the best chunks, pass them plus the query to a locally-hosted Llama 3 8B model to compose a smoother answer. The grounding constraint (answer only from the chunks) stays in the prompt. Adds latency; requires a GPU for acceptable speed.</td></tr>
+    <tr><td>Real authentication (SSO)</td><td><code>main.py</code> — add OAuth2/SAML middleware</td><td>Replace the current demo-user in the audit log with a real authenticated employee identity from the company SSO system.</td></tr>
+    <tr><td>Production audit database</td><td><code>audit.py</code> — replace JSON-lines file with a PostgreSQL write</td><td>The function signature stays identical; only the write destination changes. Enables proper querying, dashboards, and retention policies.</td></tr>
+  </table>
+</section>
+
+<section id="security">
+  <div class="sec-label">08 / Security Proof</div>
+  <h2>Verifying the "no external call" claim</h2>
+  <p>A security team reviewing this prototype can verify the zero-external-call claim in under ten minutes. Here is exactly what to look for:</p>
+
+  <ul class="plain">
+    <li><strong>No API key in any file.</strong> Search the entire codebase for "OPENAI_API_KEY", "ANTHROPIC_API_KEY", or any similar string. You will find zero results.</li>
+    <li><strong>No <code>requests</code> or <code>httpx</code> import in the answer path.</strong> The only files that handle answering are <code>retrieval.py</code>, <code>synthesize.py</code>, and <code>ingest.py</code> — none of them import any HTTP client library.</li>
+    <li><strong>No network socket opened during a query.</strong> Run the server and monitor network activity (e.g. <code>tcpdump -i any port not 8000</code>) while asking questions. You will see zero outbound connections.</li>
+    <li><strong>The dependencies list confirms it.</strong> Every package in <code>requirements.txt</code> (fastapi, uvicorn, pypdf, python-docx, numpy, pillow) is purely local computation — none of them have cloud backends or phone-home behaviour.</li>
+    <li><strong>The audit log is local.</strong> <code>backend/data/audit_log.jsonl</code> is written to disk on the same machine running the server. It goes nowhere else.</li>
+  </ul>
+
+  <div class="callout green">
+    <div class="lab">What this demonstrates for the enterprise proposal</div>
+    <p>This prototype proves all five core security claims from the EKO-AI proposal: (1) no external data transmission, (2) approved-only retrieval enforced at the query layer, (3) explicit refusal rather than fabrication, (4) every question logged immutably, and (5) source citation on every answer. All five are live, testable, working features — not planned roadmap items.</p>
+  </div>
+</section>
+
+<footer>
+  <p>EKO-AI Prototype — Technical Guide · Solo build by Vanjari Bharath · June 2026 · Internal prototype, sample data only</p>
+</footer>
+
+</div><!-- /wrap -->
+</body>
+</html>

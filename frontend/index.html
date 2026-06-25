@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EKO-AI — Enterprise Knowledge Assistant</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0a0b; --sf:#111113; --panel:#18181b; --panel2:#1f1f23;
+  --bdr:#2a2a30; --bdr2:#38383f;
+  --tx:#e8e8ec; --tx2:#a0a0b0; --tx3:#606070;
+  --gold:#d4a853; --gold2:#8a6e38;
+  --green:#3d9e6e; --gbg:#0d2018;
+  --red:#b84040; --rbg:#1a0d0d;
+  --blue:#4a90d9;
+  --r:10px; --rs:6px;
+  --font:'Inter',-apple-system,sans-serif;
+  --sw:240px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;overflow:hidden;}
+body{font-family:var(--font);background:var(--bg);color:var(--tx);-webkit-font-smoothing:antialiased;}
+::selection{background:var(--gold);color:#000;}
+a{color:var(--gold);text-decoration:none;}
+button{font-family:var(--font);cursor:pointer;}
+
+/* ── LAYOUT ── */
+#app{display:flex;height:100vh;}
+#sidebar{width:var(--sw);background:var(--sf);border-right:1px solid var(--bdr);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto;}
+#main{flex:1;display:flex;flex-direction:column;overflow:hidden;position:relative;}
+
+/* ── SIDEBAR ── */
+.s-logo{padding:18px 16px 14px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;gap:10px;}
+.logo-mark{width:30px;height:30px;background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:#000;flex-shrink:0;}
+.logo-text{font-weight:600;font-size:15px;letter-spacing:-.01em;}
+.logo-sub{font-size:10px;color:var(--tx3);}
+.s-section{padding:12px 10px 6px;}
+.s-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--tx3);padding:0 6px 7px;}
+.nav-btn{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:var(--rs);background:none;border:none;width:100%;text-align:left;font-size:13.5px;color:var(--tx2);transition:background .1s,color .1s;}
+.nav-btn:hover{background:var(--panel);color:var(--tx);}
+.nav-btn.active{background:var(--panel2);color:var(--tx);}
+.nav-btn svg{flex-shrink:0;opacity:.7;}
+.nav-btn.active svg{opacity:1;}
+.s-status{margin-top:auto;padding:11px 16px;border-top:1px solid var(--bdr);font-size:11px;color:var(--tx3);}
+.s-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--tx3);margin-right:5px;transition:background .3s;}
+.s-dot.ready{background:var(--green);box-shadow:0 0 6px var(--green);}
+
+/* ── PAGES ── */
+.page{display:none;flex:1;flex-direction:column;overflow:hidden;}
+.page.active{display:flex;}
+
+/* ── CHAT PAGE ── */
+#pg-chat{display:none;flex-direction:column;height:100%;}
+#pg-chat.active{display:flex;}
+
+#chat-hdr{padding:15px 22px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+#chat-hdr h1{font-size:15px;font-weight:600;}
+#chat-hdr .sub{font-size:11.5px;color:var(--tx3);margin-top:2px;}
+.hdr-badge{font-size:11px;font-weight:500;background:var(--gbg);color:var(--green);border:1px solid var(--green);border-radius:20px;padding:3px 10px;}
+
+#chat-msgs{flex:1;overflow-y:auto;scroll-behavior:smooth;}
+#chat-msgs::-webkit-scrollbar{width:4px;}
+#chat-msgs::-webkit-scrollbar-thumb{background:var(--bdr2);border-radius:2px;}
+
+/* ── WELCOME ── */
+.welcome{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:32px;text-align:center;}
+.welcome-icon{width:54px;height:54px;background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;color:#000;margin-bottom:18px;}
+.welcome h2{font-size:21px;font-weight:700;margin-bottom:7px;}
+.welcome p{font-size:14px;color:var(--tx2);max-width:400px;line-height:1.6;margin-bottom:24px;}
+.sugg-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;width:100%;max-width:520px;}
+.sugg-btn{padding:11px 13px;background:var(--panel);border:1px solid var(--bdr);border-radius:var(--r);text-align:left;font-size:13px;color:var(--tx2);transition:background .1s,border-color .1s,color .1s;line-height:1.4;}
+.sugg-btn:hover{background:var(--panel2);border-color:var(--bdr2);color:var(--tx);}
+
+/* ── MESSAGES ── */
+.msg-row{padding:18px 22px;border-bottom:1px solid var(--bdr);animation:fadeUp .18s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+.msg-row.user{background:var(--sf);}
+.msg-row.ai{background:var(--bg);}
+.msg-meta{display:flex;align-items:center;gap:7px;margin-bottom:9px;font-size:12px;color:var(--tx3);}
+.avatar{width:22px;height:22px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;}
+.avatar.user{background:var(--panel2);color:var(--tx2);}
+.avatar.ai{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#000;}
+.msg-content{font-size:15px;line-height:1.7;color:var(--tx);max-width:740px;}
+
+/* correction banner */
+.correction-note{display:inline-flex;align-items:center;gap:6px;background:var(--panel2);border:1px solid var(--bdr2);border-radius:var(--rs);padding:5px 10px;font-size:12px;color:var(--tx2);margin-bottom:10px;}
+.correction-note .dot{width:6px;height:6px;border-radius:50%;background:var(--gold);}
+
+/* answer body */
+.answer-opening{font-size:15px;margin-bottom:10px;}
+.answer-list{list-style:none;margin:0 0 12px;padding:0;}
+.answer-list li{display:flex;gap:10px;padding:7px 0;border-top:1px solid var(--bdr);font-size:14.5px;color:var(--tx2);line-height:1.6;}
+.answer-list li:first-child{border-top:none;}
+.answer-list li .num{min-width:20px;color:var(--gold);font-weight:600;font-size:13px;padding-top:1px;flex-shrink:0;}
+.answer-closing{font-size:13px;color:var(--tx3);margin-top:4px;}
+
+/* ── SOURCES ── */
+.sources-wrap{margin-top:13px;padding-top:13px;border-top:1px solid var(--bdr);}
+.sources-label{font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--tx3);margin-bottom:7px;}
+.src-chips{display:flex;flex-wrap:wrap;gap:7px;}
+.src-chip{display:inline-flex;align-items:center;gap:6px;background:var(--panel);border:1px solid var(--bdr);border-radius:var(--rs);padding:6px 11px;font-size:12.5px;cursor:pointer;transition:background .1s,border-color .1s;}
+.src-chip:hover{background:var(--panel2);border-color:var(--bdr2);}
+.src-chip .chip-id{font-weight:600;color:var(--gold);font-family:monospace;font-size:11.5px;}
+.src-chip .chip-sec{color:var(--tx3);font-size:11.5px;}
+.src-chip .chip-bar{width:36px;height:3px;background:var(--bdr);border-radius:2px;overflow:hidden;}
+.src-chip .chip-fill{height:100%;background:var(--gold);border-radius:2px;}
+.src-chip svg{opacity:.5;}
+
+/* ── CONFIDENCE + LATENCY ── */
+.conf-badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:500;padding:2px 8px;border-radius:20px;margin-left:auto;}
+.conf-badge.high{background:var(--gbg);color:var(--green);border:1px solid var(--green);}
+.conf-badge.medium{background:#1a1500;color:var(--gold);border:1px solid var(--gold2);}
+.conf-badge.low{background:var(--rbg);color:var(--red);border:1px solid var(--red);}
+.conf-badge.none{background:var(--panel);color:var(--tx3);border:1px solid var(--bdr);}
+.lat-tag{font-size:10.5px;color:var(--tx3);font-family:monospace;}
+
+/* refusal */
+.refusal-box{background:var(--panel);border:1px solid var(--bdr);border-left:3px solid var(--tx3);border-radius:0 var(--rs) var(--rs) 0;padding:11px 15px;font-size:14px;color:var(--tx2);line-height:1.6;}
+
+/* typing */
+.typing{display:flex;align-items:center;gap:4px;padding:4px 0;}
+.typing-dot{width:6px;height:6px;border-radius:50%;background:var(--tx3);animation:bounce 1.2s infinite;}
+.typing-dot:nth-child(2){animation-delay:.2s;}
+.typing-dot:nth-child(3){animation-delay:.4s;}
+@keyframes bounce{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-6px);opacity:1}}
+
+/* ── INPUT ── */
+#input-wrap{flex-shrink:0;padding:14px 22px 18px;border-top:1px solid var(--bdr);background:var(--bg);}
+#input-form{display:flex;align-items:flex-end;gap:9px;background:var(--panel);border:1px solid var(--bdr);border-radius:12px;padding:9px 11px;transition:border-color .15s;}
+#input-form:focus-within{border-color:var(--bdr2);}
+#q-input{flex:1;background:none;border:none;outline:none;font-family:var(--font);font-size:14.5px;color:var(--tx);resize:none;max-height:130px;min-height:24px;line-height:1.5;padding:2px 0;}
+#q-input::placeholder{color:var(--tx3);}
+#send-btn{width:32px;height:32px;background:var(--gold);border:none;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:opacity .12s,transform .1s;}
+#send-btn:hover:not(:disabled){opacity:.85;transform:scale(1.05);}
+#send-btn:disabled{opacity:.3;cursor:default;}
+.input-footer{text-align:center;font-size:11px;color:var(--tx3);margin-top:7px;}
+
+/* ── STATIC PAGES ── */
+.static-pg{display:none;flex-direction:column;height:100%;overflow-y:auto;}
+.static-pg.active{display:flex;}
+.static-pg::-webkit-scrollbar{width:4px;}
+.static-pg::-webkit-scrollbar-thumb{background:var(--bdr2);border-radius:2px;}
+.pg-hdr{padding:28px 44px 22px;border-bottom:1px solid var(--bdr);flex-shrink:0;}
+.pg-eyebrow{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--gold);margin-bottom:7px;}
+.pg-hdr h2{font-size:24px;font-weight:700;letter-spacing:-.01em;}
+.pg-hdr p{font-size:14.5px;color:var(--tx2);margin-top:7px;max-width:560px;line-height:1.6;}
+.pg-body{padding:30px 44px 56px;flex:1;}
+.pg-body h3{font-size:17px;font-weight:600;margin:28px 0 10px;color:var(--tx);}
+.pg-body h3:first-child{margin-top:0;}
+.pg-body p{font-size:14px;color:var(--tx2);line-height:1.7;margin-bottom:11px;max-width:680px;}
+.pg-body ul{list-style:none;margin:12px 0 20px;}
+.pg-body ul li{font-size:13.5px;color:var(--tx2);padding:8px 0 8px 22px;border-top:1px solid var(--bdr);position:relative;}
+.pg-body ul li:first-child{border-top:none;}
+.pg-body ul li::before{content:"—";position:absolute;left:0;color:var(--tx3);}
+.callout{border-left:3px solid var(--gold);background:var(--panel);border-radius:0 var(--rs) var(--rs) 0;padding:13px 16px;margin:16px 0;}
+.callout .cl{font-family:monospace;font-size:10.5px;color:var(--gold);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px;}
+.callout p{font-size:13.5px;color:var(--tx);margin:0;max-width:none;}
+.callout.green{border-left-color:var(--green);}.callout.green .cl{color:var(--green);}
+table.docs-tbl{width:100%;border-collapse:collapse;font-size:13.5px;margin:14px 0;}
+.docs-tbl th{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--tx3);padding:8px 10px;border-bottom:1px solid var(--bdr);text-align:left;}
+.docs-tbl td{padding:11px 10px;border-bottom:1px solid var(--bdr);color:var(--tx2);vertical-align:top;}
+.docs-tbl td:first-child{color:var(--gold);font-family:monospace;font-size:12px;}
+.docs-tbl tr:last-child td{border-bottom:none;}
+.code-blk{background:#0a0a0a;border:1px solid var(--bdr);border-radius:var(--rs);padding:14px 16px;font-family:monospace;font-size:13px;line-height:1.6;color:#c8d3e0;overflow-x:auto;margin:11px 0;}
+.code-blk .c{color:var(--tx3);}
+.code-blk .s{color:var(--green);}
+.step-list{list-style:none;margin:14px 0;}
+.step-item{display:flex;gap:12px;align-items:flex-start;padding:12px 0;border-top:1px solid var(--bdr);}
+.step-item:first-child{border-top:none;}
+.step-num{min-width:26px;height:26px;background:var(--panel2);border:1px solid var(--bdr);border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:600;color:var(--gold);font-family:monospace;flex-shrink:0;}
+.step-body{font-size:14px;color:var(--tx2);line-height:1.6;}
+.step-body strong{color:var(--tx);font-weight:600;}
+
+/* ── DOCUMENT VIEWER MODAL ── */
+#doc-modal{display:none;position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);align-items:center;justify-content:center;}
+#doc-modal.open{display:flex;}
+#doc-panel{background:var(--sf);border:1px solid var(--bdr);border-radius:12px;width:min(760px,95vw);max-height:86vh;display:flex;flex-direction:column;overflow:hidden;}
+#doc-modal-hdr{padding:18px 22px 14px;border-bottom:1px solid var(--bdr);display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-shrink:0;}
+#doc-modal-title{font-weight:600;font-size:16px;}
+#doc-modal-meta{font-size:12px;color:var(--tx3);margin-top:3px;}
+#doc-modal-close{background:var(--panel2);border:1px solid var(--bdr);color:var(--tx2);width:28px;height:28px;border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:16px;line-height:1;}
+#doc-modal-close:hover{background:var(--bdr);color:var(--tx);}
+#doc-modal-body{overflow-y:auto;padding:20px 22px 28px;flex:1;}
+#doc-modal-body::-webkit-scrollbar{width:4px;}
+#doc-modal-body::-webkit-scrollbar-thumb{background:var(--bdr2);border-radius:2px;}
+.doc-section{margin-bottom:22px;}
+.doc-section-hdr{font-weight:600;font-size:14.5px;color:var(--gold);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--bdr);}
+.doc-section-body{font-size:14px;line-height:1.7;color:var(--tx2);}
+
+@media(max-width:680px){#sidebar{display:none;}.pg-hdr,.pg-body{padding-left:16px;padding-right:16px;}.sugg-grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- ── SIDEBAR ── -->
+<nav id="sidebar">
+  <div class="s-logo">
+    <div class="logo-mark">E</div>
+    <div><div class="logo-text">EKO-AI</div><div class="logo-sub">Internal Assistant</div></div>
+  </div>
+  <div class="s-section">
+    <div class="s-label">Workspace</div>
+    <button class="nav-btn active" onclick="nav('chat',this)">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Ask EKO-AI
+    </button>
+  </div>
+  <div class="s-section">
+    <div class="s-label">Reference</div>
+    <button class="nav-btn" onclick="nav('about',this)">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>About EKO-AI
+    </button>
+    <button class="nav-btn" onclick="nav('docs',this)">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Documents
+    </button>
+    <button class="nav-btn" onclick="nav('howto',this)">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>How to Use
+    </button>
+  </div>
+  <div class="s-status"><span class="s-dot" id="sdot"></span><span id="stxt">Connecting…</span></div>
+</nav>
+
+<!-- ── MAIN ── -->
+<div id="main">
+
+<!-- CHAT -->
+<div id="pg-chat" class="page active">
+  <div id="chat-hdr">
+    <div><h1>EKO-AI — Enterprise Knowledge Assistant</h1><div class="sub">Searches approved documents · Zero external calls · All answers sourced</div></div>
+    <div class="hdr-badge" id="idx-badge">Loading…</div>
+  </div>
+  <div id="chat-msgs">
+    <div class="welcome" id="welcome">
+      <div class="welcome-icon">E</div>
+      <h2>How can I help you today?</h2>
+      <p>I know everything in our approved policy documents. Ask me anything about onboarding, payroll, leave, security, trainings, or tower processes — in plain English.</p>
+      <div class="sugg-grid">
+        <button class="sugg-btn" onclick="ask('Can I take a photo of my screen showing client code?')">Can I take a photo of my screen showing client code?</button>
+        <button class="sugg-btn" onclick="ask('What should I do on my first day?')">What should I do on my first day?</button>
+        <button class="sugg-btn" onclick="ask('When is my salary credited each month?')">When is my salary credited each month?</button>
+        <button class="sugg-btn" onclick="ask('Can I use ChatGPT for client work?')">Can I use ChatGPT for client work?</button>
+        <button class="sugg-btn" onclick="ask('What trainings are mandatory in Week 1?')">What trainings are mandatory in Week 1?</button>
+        <button class="sugg-btn" onclick="ask('I am experienced but new to this project. What do I do?')">I am experienced but new to this project. What do I do?</button>
+      </div>
+    </div>
+  </div>
+  <div id="input-wrap">
+    <form id="input-form" onsubmit="handleSubmit(event)">
+      <textarea id="q-input" placeholder="Ask me anything about policies, payroll, leave, onboarding, security…" rows="1" onkeydown="handleKey(event)" oninput="resize(this)"></textarea>
+      <button type="submit" id="send-btn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="color:#000"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>
+      </button>
+    </form>
+    <div class="input-footer">EKO-AI · Answers sourced from approved documents · Zero external API calls · Every question is logged</div>
+  </div>
+</div>
+
+<!-- ABOUT -->
+<div id="pg-about" class="static-pg">
+  <div class="pg-hdr">
+    <div class="pg-eyebrow">About</div>
+    <h2>What is EKO-AI?</h2>
+    <p>Your internal knowledge assistant — searches approved policy documents, gives sourced answers, works fully offline, never guesses.</p>
+  </div>
+  <div class="pg-body">
+    <h3>In one sentence</h3>
+    <p>You ask a question in plain English; EKO-AI finds the most relevant sections across all approved policy documents and returns a direct, structured answer with the exact source attached — with zero external API calls, zero data leaving this machine.</p>
+    <div class="callout green"><div class="cl">Security Design</div><p>Disconnect WiFi after startup and EKO-AI still works perfectly. There is no outbound network call anywhere in the answer path — verifiable by anyone who reads the source code.</p></div>
+    <h3>Why it exists</h3>
+    <p>Existing tools like Rovo AI and Confluence search return one generic result at a time and only serve the DevOps team. EKO-AI serves all five towers — AuthEnq, EIS, ITS, Digital, and Operations — with accurate, policy-sourced answers combining information from multiple documents at once.</p>
+    <h3>Key capabilities</h3>
+    <ul>
+      <li>Understands plain English — including typos and abbreviations like "PF", "WFH", "BGV", "F&amp;F"</li>
+      <li>Combines information from multiple policy documents into one structured answer</li>
+      <li>Cites the exact document ID and section for every point in the answer — click any source to read the full policy</li>
+      <li>Responds to greetings, clarification questions, and "what can you do" queries naturally</li>
+      <li>Explicitly refuses to guess when no approved source covers the question</li>
+      <li>Logs every question to an audit trail — timestamp, source docs used, confidence</li>
+      <li>Sub-2ms search latency — answers appear almost instantly</li>
+    </ul>
+    <h3>What it does not do</h3>
+    <ul>
+      <li>Does not answer questions from general internet knowledge — only from approved documents</li>
+      <li>Does not call any external API or AI service — everything runs locally</li>
+      <li>Does not store conversation history after the server restarts (prototype limitation)</li>
+    </ul>
+  </div>
+</div>
+
+<!-- DOCS -->
+<div id="pg-docs" class="static-pg">
+  <div class="pg-hdr">
+    <div class="pg-eyebrow">Document Index</div>
+    <h2>What EKO-AI can answer from</h2>
+    <p>Every approved document currently indexed. Click any row to read the full document inside EKO-AI.</p>
+  </div>
+  <div class="pg-body">
+    <div id="docs-loading" style="color:var(--tx3);font-size:14px;padding:16px 0;">Loading…</div>
+    <table class="docs-tbl" id="docs-tbl" style="display:none">
+      <thead><tr><th>Doc ID</th><th>Title</th><th>Type</th><th style="text-align:right">Chunks</th></tr></thead>
+      <tbody id="docs-body"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- HOW TO USE -->
+<div id="pg-howto" class="static-pg">
+  <div class="pg-hdr">
+    <div class="pg-eyebrow">How to Use</div>
+    <h2>Running and using EKO-AI locally</h2>
+    <p>Complete steps to start the system, add documents, and get the best answers.</p>
+  </div>
+  <div class="pg-body">
+    <h3>Start the system</h3>
+    <ul class="step-list">
+      <li class="step-item"><div class="step-num">1</div><div class="step-body"><strong>Open a terminal in the backend folder</strong> and install dependencies (one time only).</div></li>
+      <li class="step-item"><div class="step-num">2</div><div class="step-body"><strong>Start the server.</strong> It automatically reads and indexes all documents in sample-docs/ on startup.</div></li>
+      <li class="step-item"><div class="step-num">3</div><div class="step-body"><strong>Open this file</strong> (frontend/index.html) in any browser — no build step needed.</div></li>
+      <li class="step-item"><div class="step-num">4</div><div class="step-body"><strong>Ask questions</strong> in plain English. Answers arrive in under 100ms.</div></li>
+    </ul>
+    <div class="code-blk"><span class="c"># Step 1 — install (run once)</span>
+cd backend
+pip install -r requirements.txt
+
+<span class="c"># Step 2 — start server</span>
+uvicorn main:app --reload --port 8000
+
+<span class="c"># Step 3 — open frontend (just double-click or drag into browser)</span>
+<span class="s">frontend/index.html</span></div>
+
+    <h3>Adding a new document</h3>
+    <div class="code-blk"><span class="c"># Drop any PDF, Word (.docx), or Markdown (.md) into sample-docs/</span>
+<span class="c"># Then reindex without restarting:</span>
+curl -X POST http://localhost:8000/reindex</div>
+
+    <h3>Tips for better answers</h3>
+    <ul>
+      <li>Ask in full sentences — "how many days of earned leave do I get" works better than just "leave days"</li>
+      <li>Common abbreviations work — PF, WFH, BGV, F&amp;F, HRA, LOP, SSO, MFA are all understood</li>
+      <li>Typos are corrected automatically — "leeve", "photu", "clent" are all handled</li>
+      <li>Click any source chip under an answer to read the full policy document</li>
+      <li>If an answer feels incomplete, try adding more context — "I am a new joiner in EIS tower, what trainings do I need?"</li>
+    </ul>
+
+    <h3>Test endpoints (browser)</h3>
+    <ul>
+      <li><a href="http://localhost:8000/docs" target="_blank">localhost:8000/docs</a> — interactive API explorer (try any endpoint without code)</li>
+      <li><a href="http://localhost:8000/audit" target="_blank">localhost:8000/audit</a> — see every question asked, logged in real time</li>
+      <li><a href="http://localhost:8000/documents" target="_blank">localhost:8000/documents</a> — full document index with chunk counts</li>
+      <li><a href="http://localhost:8000/health" target="_blank">localhost:8000/health</a> — server status and index statistics</li>
+    </ul>
+  </div>
+</div>
+
+</div><!-- /main -->
+</div><!-- /app -->
+
+<!-- ── DOCUMENT VIEWER MODAL ── -->
+<div id="doc-modal">
+  <div id="doc-panel">
+    <div id="doc-modal-hdr">
+      <div>
+        <div id="doc-modal-title">Loading…</div>
+        <div id="doc-modal-meta"></div>
+      </div>
+      <button id="doc-modal-close" onclick="closeDoc()">✕</button>
+    </div>
+    <div id="doc-modal-body"></div>
+  </div>
+</div>
+
+<script>
+const API = 'http://localhost:8000';
+let SESSION_ID = 'session-' + Date.now();
+
+// ── NAV ──────────────────────────────────────────────────
+function nav(name, btn) {
+  document.querySelectorAll('.page,.static-pg').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  const pg = document.getElementById('pg-' + name);
+  if (pg) pg.classList.add('active');
+  if (btn) btn.classList.add('active');
+  if (name === 'docs') loadDocs();
+}
+
+// ── STATUS ───────────────────────────────────────────────
+async function checkStatus() {
+  const dot = document.getElementById('sdot');
+  const txt = document.getElementById('stxt');
+  const badge = document.getElementById('idx-badge');
+  try {
+    const r = await fetch(API + '/health');
+    const d = await r.json();
+    if (d.status === 'ready') {
+      dot.className = 's-dot ready';
+      txt.textContent = 'System ready';
+      if (badge) badge.textContent = `${d.stats.total_chunks} chunks · ${d.stats.total_documents} docs`;
+    } else {
+      txt.textContent = 'Starting…';
+      setTimeout(checkStatus, 2000);
+    }
+  } catch {
+    dot.className = 's-dot';
+    txt.textContent = 'Backend offline';
+    if (badge) badge.textContent = 'Start backend first';
+    setTimeout(checkStatus, 3000);
+  }
+}
+
+// ── DOCS PAGE ─────────────────────────────────────────────
+async function loadDocs() {
+  const loading = document.getElementById('docs-loading');
+  const tbl     = document.getElementById('docs-tbl');
+  const tbody   = document.getElementById('docs-body');
+  try {
+    const r = await fetch(API + '/documents');
+    const { documents } = await r.json();
+    tbody.innerHTML = '';
+    documents.forEach(doc => {
+      const ext = doc.source_file.split('.').pop().toLowerCase();
+      const type = ext === 'pdf' ? 'PDF' : ext === 'png' || ext === 'jpg' ? 'Image' : 'Markdown';
+      tbody.innerHTML += `<tr style="cursor:pointer" onclick="openDoc('${doc.doc_id}')">
+        <td>${esc(doc.doc_id)}</td>
+        <td style="color:var(--tx)">${esc(doc.doc_title)}</td>
+        <td style="color:var(--tx3);font-size:12px">${type}</td>
+        <td style="color:var(--tx3);font-size:12px;text-align:right">${doc.chunk_count}</td>
+      </tr>`;
+    });
+    loading.style.display = 'none';
+    tbl.style.display = 'table';
+  } catch {
+    loading.textContent = 'Cannot load — is the backend running?';
+  }
+}
+
+// ── DOCUMENT VIEWER ───────────────────────────────────────
+async function openDoc(docId) {
+  const modal = document.getElementById('doc-modal');
+  const title = document.getElementById('doc-modal-title');
+  const meta  = document.getElementById('doc-modal-meta');
+  const body  = document.getElementById('doc-modal-body');
+  title.textContent = 'Loading…';
+  meta.textContent  = '';
+  body.innerHTML    = '';
+  modal.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  try {
+    const r = await fetch(`${API}/document/${encodeURIComponent(docId)}`);
+    if (!r.ok) throw new Error('Not found');
+    const d = await r.json();
+    title.textContent = d.doc_title;
+    meta.textContent  = `${d.doc_id} · ${d.source_file} · ${d.total_chunks} sections indexed`;
+    body.innerHTML = d.sections.map(s => `
+      <div class="doc-section">
+        <div class="doc-section-hdr">${esc(s.heading)}</div>
+        <div class="doc-section-body">${esc(s.text).replace(/\n/g,'<br>')}</div>
+      </div>`).join('');
+  } catch {
+    body.innerHTML = '<p style="color:var(--tx3)">Could not load document.</p>';
+  }
+}
+
+function closeDoc() {
+  document.getElementById('doc-modal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.getElementById('doc-modal').addEventListener('click', e => {
+  if (e.target === document.getElementById('doc-modal')) closeDoc();
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDoc(); });
+
+// ── CHAT ─────────────────────────────────────────────────
+function ask(q) {
+  document.getElementById('q-input').value = q;
+  handleSubmit(new Event('submit'));
+}
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSubmit(new Event('submit')); }
+}
+function resize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 130) + 'px';
+}
+function handleSubmit(e) {
+  e.preventDefault();
+  const inp = document.getElementById('q-input');
+  const q   = inp.value.trim();
+  if (!q) return;
+  inp.value = ''; inp.style.height = '';
+  sendMessage(q);
+}
+
+function hideWelcome() {
+  const w = document.getElementById('welcome');
+  if (w) w.style.display = 'none';
+}
+
+function addUser(text) {
+  hideWelcome();
+  const c = document.getElementById('chat-msgs');
+  const r = document.createElement('div');
+  r.className = 'msg-row user';
+  r.innerHTML = `
+    <div class="msg-meta"><div class="avatar user">U</div><span>You</span></div>
+    <div class="msg-content"><p>${esc(text)}</p></div>`;
+  c.appendChild(r); c.scrollTop = c.scrollHeight;
+}
+
+function addTyping() {
+  const c = document.getElementById('chat-msgs');
+  const r = document.createElement('div');
+  r.className = 'msg-row ai'; r.id = 'typing-row';
+  r.innerHTML = `<div class="msg-meta"><div class="avatar ai">E</div><span>EKO-AI</span></div>
+    <div class="msg-content"><div class="typing"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div></div>`;
+  c.appendChild(r); c.scrollTop = c.scrollHeight;
+}
+function removeTyping() { const t = document.getElementById('typing-row'); if (t) t.remove(); }
+
+function addAI(data) {
+  const c = document.getElementById('chat-msgs');
+  const r = document.createElement('div');
+  r.className = 'msg-row ai';
+
+  const conf    = data.found ? (data.confidence || 'medium') : 'none';
+  const confLbl = data.found
+    ? (conf === 'high' ? '● High' : conf === 'medium' ? '◑ Medium' : '◌ Low')
+    : '— Not found';
+
+  // Correction note
+  let corrHtml = '';
+  if (data.correction_note) {
+    corrHtml = `<div class="correction-note"><span class="dot"></span>${esc(data.correction_note)}</div>`;
+  }
+
+  // Answer body — if answer_parts has structured list, render numbered; else render full text
+  let bodyHtml = '';
+  if (data.found && data.answer_parts && data.answer_parts.length > 0) {
+    // Parse the answer text to extract opening + closing lines, render middle as list
+    const lines = data.answer.split('\n').map(l => l.trim()).filter(Boolean);
+    const opening = lines[0] || '';
+    const closing  = lines[lines.length - 1] || '';
+    const listItems = data.answer_parts.map((pt, i) =>
+      `<li><span class="num">${i+1}.</span>${esc(pt)}</li>`).join('');
+    bodyHtml = `
+      <p class="answer-opening">${esc(opening)}</p>
+      <ul class="answer-list">${listItems}</ul>
+      <p class="answer-closing">${esc(closing)}</p>`;
+  } else if (data.found) {
+    // Conversational response — render with newline support
+    const rendered = esc(data.answer)
+      .replace(/\n\n/g,'</p><p style="margin-top:8px">')
+      .replace(/\n(\d+)\.\s/g,'<br><strong style="color:var(--gold)">$1.</strong> ');
+    bodyHtml = `<p>${rendered}</p>`;
+  } else {
+    bodyHtml = `<div class="refusal-box">${esc(data.answer)}</div>`;
+  }
+
+  // Sources — clickable chips that open the full document
+  let srcHtml = '';
+  if (data.sources && data.sources.length > 0) {
+    const chips = data.sources.map(s => {
+      const fill = Math.round((s.relevance || 0) * 100);
+      return `<div class="src-chip" onclick="openDoc('${esc(s.doc_id)}')" title="Click to read full document">
+        <span class="chip-id">${esc(s.doc_id)}</span>
+        <span class="chip-sec">→ ${esc(s.section)}</span>
+        <div class="chip-bar"><div class="chip-fill" style="width:${fill}%"></div></div>
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+      </div>`;
+    }).join('');
+    srcHtml = `<div class="sources-wrap"><div class="sources-label">Sources — click to read full policy</div><div class="src-chips">${chips}</div></div>`;
+  }
+
+  r.innerHTML = `
+    <div class="msg-meta">
+      <div class="avatar ai">E</div><span>EKO-AI</span>
+      <div class="conf-badge ${conf}">${confLbl}</div>
+      <span class="lat-tag">${data.latency_ms}ms</span>
+    </div>
+    <div class="msg-content">${corrHtml}${bodyHtml}${srcHtml}</div>`;
+
+  c.appendChild(r); c.scrollTop = c.scrollHeight;
+}
+
+function addError(msg) {
+  const c = document.getElementById('chat-msgs');
+  const r = document.createElement('div');
+  r.className = 'msg-row ai';
+  r.innerHTML = `<div class="msg-meta"><div class="avatar ai">E</div><span>EKO-AI</span></div>
+    <div class="msg-content"><div class="refusal-box" style="border-left-color:var(--red)">${esc(msg)}</div></div>`;
+  c.appendChild(r); c.scrollTop = c.scrollHeight;
+}
+
+async function sendMessage(question) {
+  const btn = document.getElementById('send-btn');
+  btn.disabled = true;
+  addUser(question);
+  addTyping();
+  try {
+    const res = await fetch(API + '/ask', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ question, top_k: 5, session_id: SESSION_ID }),
+    });
+    if (!res.ok) {
+      const e = await res.json().catch(() => ({}));
+      throw new Error(e.detail || 'Server error ' + res.status);
+    }
+    const data = await res.json();
+    removeTyping();
+    addAI(data);
+  } catch (err) {
+    removeTyping();
+    if (err.message.includes('fetch') || err.message.includes('Network')) {
+      addError('Cannot reach the backend. Make sure it is running on http://localhost:8000 — see the How to Use page.');
+    } else {
+      addError('Something went wrong: ' + err.message);
+    }
+  } finally {
+    btn.disabled = false;
+    document.getElementById('q-input').focus();
+  }
+}
+
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── INIT ──────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  checkStatus();
+  document.getElementById('q-input').focus();
+});
+</script>
+</body>
+</html>
