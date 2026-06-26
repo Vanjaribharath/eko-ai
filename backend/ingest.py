@@ -29,8 +29,8 @@ from extract import extract_text
 from chunk import chunk_document
 from retrieval import TfidfIndex
 
-SAMPLE_DOCS_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "sample-docs")
-SAMPLE_IMAGES_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "sample-images")
+SAMPLE_DOCS_DIR = os.path.join(os.path.dirname(__file__), "sample-docs")
+SAMPLE_IMAGES_DIR = os.path.join(os.path.dirname(__file__), "sample-images")
 
 SUPPORTED_EXTENSIONS = {".pdf", ".docx", ".md", ".txt", ".png", ".jpg", ".jpeg"}
 
